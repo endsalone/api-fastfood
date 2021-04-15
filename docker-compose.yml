@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  mysql:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    container_name: mysql-saff
+    environment:
+      MYSQL_ROOT_PASSWORD: "saff"
+      MYSQL_DATABASE: "saff"
+      MYSQL_USER: "saff"
+      MYSQL_PASSWORD: "saff"
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    ports:
+      - "3306:3306"
+    networks:
+      vpcbr:
+        ipv4_address: 10.5.0.5
+networks:
+  vpcbr:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
+          gateway: 10.5.0.1

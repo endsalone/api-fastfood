@@ -6,5 +6,6 @@ import org.springframework.data.domain.Page;
 
 public interface IProductsRepository {
   Page<Products> findAll(Pagination pagination);
-  Page<Products> findByNameOrDescription(String text, Pagination pagination);
+  Page<Products> findByNameOrDescription(Pagination pagination);
+  Products findById(long id);
 }

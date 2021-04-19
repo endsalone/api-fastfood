@@ -5,6 +5,7 @@ import lombok.*;
 import org.aspectj.util.LangUtil;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.util.StringUtils;
 
 @Getter
 @Setter
@@ -14,7 +15,8 @@ import org.springframework.data.domain.Sort;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Pagination {
 
-  private String search;
+  @Builder.Default
+  private String search = null;
 
   private int page;
   @Builder.Default
@@ -46,14 +48,13 @@ public class Pagination {
   }
 
   public String toString() {
-    String toSearch = LangUtil.isEmpty(this.getSearch())
-      ? ""
-      : "search=" + this.getSearch() + "&";
+    String toSearch = StringUtils.hasText(this.getSearch())
+      ? "search=" + this.getSearch() + "&"
+      : "";
 
     return "?" + toSearch
       + "page=" + this.getPageUrl()
       + "&size=" + this.getSize()
       + "&order=" + this.getOrder()
-      + "&sort=" + this.getSort();
-  }
+      + "&sort=" + this.getSort(); }
 }

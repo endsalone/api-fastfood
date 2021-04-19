@@ -11,7 +11,6 @@ import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,37 +26,49 @@ public abstract class HalList<T extends IEntity>  {
   private final ModelMapper modelMapper = new ModelMapper();
 
   @GetMapping
-  public abstract ResponseEntity<?> getAll(
-    Pagination pagination,
-    @RequestParam(required = false) String search
-  );
+  public abstract ResponseEntity<?> getAll(Pagination pagination);
 
   @GetMapping("/{id}")
   public abstract ResponseEntity<?> getItem(@PathVariable long id);
 
-  protected CollectionModel<EntityModel<T>> makeLinks(Pagination pagination, String search) {
-    List<T> listDto = this.pageItems
+  protected CollectionModel<EntityModel<T>> listLinks(Pagination pagination) {
+
+    List<EntityModel<T>> entityModel = this.pageItems
       .getContent()
       .stream()
-      .map(item -> modelMapper.map(item, this.dto))
-      .collect(Collectors.toList());
-
-    List<EntityModel<T>> entityModel = listDto
-      .stream()
-      .map(item -> EntityModel
-        .of(item)
-        .add()
-        .add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).getItem(item.getId())).withSelfRel())
+      .map(itemToMapper -> modelMapper.map(itemToMapper, this.dto))
+      .map(itemEntityModel -> EntityModel
+        .of(itemEntityModel)
+        .add(
+          WebMvcLinkBuilder.linkTo(getItemMethod(itemEntityModel)).withSelfRel()
+        )
       )
       .collect(Collectors.toList());
 
     Link selfUrl = WebMvcLinkBuilder
-      .linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).getAll(pagination, search))
+      .linkTo(getAllMethod(pagination, pagination.getSearch()))
       .slash(pagination.toString())
       .withSelfRel();
 
     return CollectionModel
       .of(entityModel)
-      .add((selfUrl));
+      .add(selfUrl);
+  }
+
+  private ResponseEntity getAllMethod(Pagination pagination, String search) {
+    return WebMvcLinkBuilder.methodOn(this.getClass()).getAll(pagination);
+  }
+
+  private ResponseEntity getItemMethod(T itemEntityModel) {
+    return WebMvcLinkBuilder.methodOn(this.getClass()).getItem(itemEntityModel.getId());
+  }
+
+  protected <U> EntityModel<T> itemLink(U item) {
+    T itemEntityModel = modelMapper.map(item, this.dto);
+    return EntityModel
+      .of(itemEntityModel)
+      .add(
+        WebMvcLinkBuilder.linkTo(getItemMethod(itemEntityModel)).withSelfRel()
+      );
   }
 }

@@ -8,4 +8,5 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 
 public interface IProductsJpaRepository extends JpaRepository<Products, Long>, PagingAndSortingRepository<Products, Long> {
   Page<Products> findByNameContainsOrDescriptionContains(String name, String description, Pageable pageable);
+  Products findById(long id);
 }

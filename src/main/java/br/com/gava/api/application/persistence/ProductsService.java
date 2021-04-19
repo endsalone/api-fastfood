@@ -26,11 +26,16 @@ public class ProductsService implements IProductsRepository {
   }
 
   @Override
-  public Page<Products> findByNameOrDescription(String text, Pagination pagination) {
+  public Page<Products> findByNameOrDescription(Pagination pagination) {
     PageRequest pageRequest = pagination.pageRequest();
-    Page<Products> productsPage = this.repository.findByNameContainsOrDescriptionContains(text, text, pageRequest);
+    Page<Products> productsPage = this.repository.findByNameContainsOrDescriptionContains(pagination.getSearch(), pagination.getSearch(), pageRequest);
 
     return productsPage;
+  }
+
+  @Override
+  public Products findById(long id) {
+    return this.repository.findById(id);
   }
 
 }
